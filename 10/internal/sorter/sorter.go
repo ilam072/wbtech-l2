@@ -20,12 +20,10 @@ type Sorter struct {
 
 var titleCaser = cases.Title(language.Und)
 
-// Конструктор
 func New() Sorter {
 	return Sorter{[]string{}}
 }
 
-// Базовая лексикографическая сортировка
 func (s *Sorter) Sort() {
 	slices.Sort(s.data)
 }
@@ -58,16 +56,11 @@ func (s *Sorter) SortByColumn(column int, numeric bool) {
 	})
 }
 
-// Числовая сортировка (float64)
-// Сортировка всего слайса по числовому значению, как sort -n.
-// Для каждой строки берём ведущую числовую часть (если есть), иначе 0.
-// При равенстве чисел — fallback на строковое сравнение.
 func (s *Sorter) SortNumeric() {
 	slices.SortFunc(s.data, func(a, b string) int {
 		na, okA := leadingNumber(a)
 		nb, okB := leadingNumber(b)
 
-		// если нет чисел, считаем их 0 (так же как GNU sort)
 		if !okA {
 			na = 0
 		}
@@ -81,17 +74,14 @@ func (s *Sorter) SortNumeric() {
 		if na > nb {
 			return 1
 		}
-		// tie-breaker: lexicographic full-string compare
 		return cmp.Compare(a, b)
 	})
 }
 
-// Реверс
 func (s *Sorter) Reverse() {
 	slices.Reverse(s.data)
 }
 
-// Удалить дубликаты
 func (s *Sorter) Unique() {
 	unique := make(map[string]struct{})
 	for _, line := range s.data {
@@ -106,7 +96,6 @@ func (s *Sorter) Unique() {
 	s.data = storage
 }
 
-// Сортировка по названию месяца (Jan, Feb, ...)
 func (s *Sorter) SortByMonth(column int) {
 	monthMap := map[string]time.Month{
 		"Jan": time.January, "Feb": time.February, "Mar": time.March,
@@ -115,7 +104,6 @@ func (s *Sorter) SortByMonth(column int) {
 		"Oct": time.October, "Nov": time.November, "Dec": time.December,
 	}
 
-	// позиция столбца для сортировки (от 0)
 	pos := column - 1
 	if pos < 0 {
 		pos = 0
@@ -127,13 +115,11 @@ func (s *Sorter) SortByMonth(column int) {
 
 		var ma, mb time.Month
 
-		// Функция для извлечения месяца из поля
 		getMonth := func(fields []string) time.Month {
 			if len(fields) <= pos {
 				return 0
 			}
 			field := strings.TrimSpace(fields[pos])
-			// Приводим к виду с заглавной буквы, например jan -> Jan
 			monthStr := titleCaser.String(strings.ToLower(field))
 			return monthMap[monthStr]
 		}
@@ -141,7 +127,6 @@ func (s *Sorter) SortByMonth(column int) {
 		ma = getMonth(fieldsA)
 		mb = getMonth(fieldsB)
 
-		// Если месяц не найден (0), считаем его "больше" всех (например 13)
 		aVal := int(ma)
 		bVal := int(mb)
 
@@ -161,14 +146,12 @@ func (s *Sorter) SortByMonth(column int) {
 	})
 }
 
-// Игнорировать хвостовые пробелы
 func (s *Sorter) TrimTrailingSpaces() {
 	for i, v := range s.data {
 		s.data[i] = strings.TrimRight(v, " \t\r")
 	}
 }
 
-// Проверка отсортированности
 func (s *Sorter) IsSorted(fileName string) {
 	if fileName == "" {
 		fileName = "-"
@@ -183,7 +166,6 @@ func (s *Sorter) IsSorted(fileName string) {
 	}
 }
 
-// Человекочитаемые размеры (с суффиксами K, M, G)
 func (s *Sorter) SortHumanNumeric() {
 	multiplier := map[byte]float64{
 		'K': 1 << 10, 'k': 1 << 10,
@@ -208,7 +190,6 @@ func (s *Sorter) SortHumanNumeric() {
 		if err != nil {
 			return 0, 0
 		}
-		// Множитель 1 для чисел без суффикса, чтобы они шли раньше
 		return num, 1
 	}
 
@@ -216,13 +197,7 @@ func (s *Sorter) SortHumanNumeric() {
 		na, ma := parse(a)
 		nb, mb := parse(b)
 
-		// Сравниваем сначала по значению без множителя, чтобы числа без суффикса были корректно упорядочены
-		// Если множитель равен 1 (числа без суффикса), они сортируются как обычно
-		// Если множители разные (число без суффикса vs с суффиксом), числа без суффикса идут первыми
-		// Если множители равны и больше 1, сравниваем по числу * множитель
-
 		if ma == 1 && mb == 1 {
-			// Оба без суффикса — сравниваем по числу
 			if na < nb {
 				return -1
 			} else if na > nb {
@@ -240,7 +215,6 @@ func (s *Sorter) SortHumanNumeric() {
 			return 1
 		}
 
-		// Оба с суффиксом, сравниваем по реальному значению
 		valA := na * ma
 		valB := nb * mb
 		if valA < valB {
@@ -252,7 +226,6 @@ func (s *Sorter) SortHumanNumeric() {
 	})
 }
 
-// Получить данные
 func (s *Sorter) Data() []string {
 	return s.data
 }
@@ -273,11 +246,7 @@ func (s *Sorter) ReadData(input io.Reader) {
 	}
 }
 
-// leadingNumber извлекает ведущую числовую часть строки и парсит её в float64.
-// Возвращает (value, true) если найден хотя бы один цифровой символ в корректной позиции,
-// иначе (0, false).
 func leadingNumber(s string) (float64, bool) {
-	// trim leading spaces/tabs
 	i := 0
 	for i < len(s) && (s[i] == ' ' || s[i] == '\t') {
 		i++
@@ -287,7 +256,6 @@ func leadingNumber(s string) (float64, bool) {
 	}
 	start := i
 
-	// optional sign
 	if s[i] == '+' || s[i] == '-' {
 		i++
 	}
@@ -298,7 +266,6 @@ func leadingNumber(s string) (float64, bool) {
 		digitsBefore++
 	}
 
-	// fractional part
 	digitsAfter := 0
 	if i < len(s) && s[i] == '.' {
 		i++
@@ -308,12 +275,10 @@ func leadingNumber(s string) (float64, bool) {
 		}
 	}
 
-	// if we have neither digits before nor after, it's not a number
 	if digitsBefore == 0 && digitsAfter == 0 {
 		return 0, false
 	}
 
-	// optional exponent
 	if i < len(s) && (s[i] == 'e' || s[i] == 'E') {
 		j := i + 1
 		if j < len(s) && (s[j] == '+' || s[j] == '-') {
@@ -325,13 +290,11 @@ func leadingNumber(s string) (float64, bool) {
 			expDigits++
 		}
 		if expDigits > 0 {
-			i = j // include exponent
+			i = j
 		}
-		// else: if exponent has no digits, ignore exponent part
 	}
 
 	numStr := s[start:i]
-	// parse
 	if numStr == "" {
 		return 0, false
 	}
@@ -347,6 +310,5 @@ func keyFromColumn(line string, pos int) string {
 	if len(fields) <= pos {
 		return "" // нет такого столбца
 	}
-	// вернуть всё, начиная с нужного столбца
 	return strings.Join(fields[pos:], " ")
 }

@@ -5,7 +5,6 @@ import (
 	"strings"
 )
 
-// matcher абстрагирует проверку совпадений строки с шаблоном.
 type matcher interface {
 	Match(line string) bool
 }

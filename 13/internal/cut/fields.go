@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-// ParseFields парсит строку вида "1,3-5" и возвращает уникальные индексы (0-based)
 func ParseFields(input string) ([]int, error) {
 	fields := strings.Split(input, ",")
 	resultMap := make(map[int]struct{})
@@ -42,7 +41,6 @@ func ParseFields(input string) ([]int, error) {
 		result = append(result, k)
 	}
 
-	// Сортировка по возрастанию
 	for i := 0; i < len(result); i++ {
 		for j := i + 1; j < len(result); j++ {
 			if result[i] > result[j] {

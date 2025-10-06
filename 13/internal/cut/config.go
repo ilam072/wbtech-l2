@@ -6,7 +6,6 @@ import (
 	"os"
 )
 
-// Config хранит параметры запуска утилиты
 type Config struct {
 	Fields    []int
 	Delimiter string
@@ -14,7 +13,6 @@ type Config struct {
 	Files     []string // новые аргументы файлов
 }
 
-// ParseFlags парсит флаги командной строки и возвращает конфигурацию
 func ParseFlags() (*Config, error) {
 	fieldsStr := flag.String("f", "", "fields to output (e.g. 1,3-5)")
 	delimiter := flag.String("d", "\t", "field delimiter")
@@ -30,7 +28,6 @@ func ParseFlags() (*Config, error) {
 		return nil, fmt.Errorf("error parsing fields: %w", err)
 	}
 
-	// Оставшиеся аргументы считаем файлами
 	files := flag.Args()
 
 	return &Config{
@@ -41,7 +38,6 @@ func ParseFlags() (*Config, error) {
 	}, nil
 }
 
-// ExitWithError выводит ошибку и завершает программу
 func ExitWithError(err error) {
 	fmt.Fprintln(os.Stderr, err)
 	os.Exit(1)
