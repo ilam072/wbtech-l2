@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+    calendar-postgres:
+        image: postgres:16-alpine
+        container_name: calendar-postgres
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: calendar_service
+        ports:
+            - "5433:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        networks:
+            - calendar-service
+
+    calendar-migrate:
+        image: migrate/migrate:v4.15.2
+        container_name: calendar-migrate
+        depends_on:
+            - calendar-postgres
+        command: [
+            "-path=/migrations",
+            "-database=postgres://postgres:postgres@calendar-postgres:5432/calendar_service?sslmode=disable",
+            "up"
+        ]
+        restart: on-failure
+        volumes:
+            - ./migrations:/migrations
+        networks:
+            - calendar-service
+
+volumes:
+    postgres_data:
+
+networks:
+    calendar-service:
+        driver: bridge
