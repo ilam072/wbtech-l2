@@ -38,7 +38,7 @@ fi
 
 # fourth test
 sort -Mr files/M.txt > results/MR_sort.txt
-go run ../cmd/main.go -Mr files/N.txt > results/MR_app.txt
+go run ../cmd/main.go -Mr files/M.txt > results/MR_app.txt
 
 DIFF=$(diff results/NR_sort.txt results/NR_app.txt)
 if [ "$DIFF" = "" ]

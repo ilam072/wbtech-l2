@@ -1,0 +1,12 @@
+error: file not found
+warning: low memory
+info: started
+
+error: file not found
+debug: value=42
+info: started
+
+warning: low memory
+
+info: finished
+debug: value=42

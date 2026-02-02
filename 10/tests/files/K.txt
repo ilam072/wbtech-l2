@@ -1,0 +1,14 @@
+user1	15	login
+
+user2	3	logout
+admin	42	login
+guest	7	view
+
+root	1	reboot
+user3	25	update
+
+tester	10	run
+service	2	start
+
+backup	100	save
+monitor	5	check
