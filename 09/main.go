@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
-	"unicode/utf8"
 )
 
 func main() {
@@ -34,29 +33,33 @@ func main() {
 
 func unpack(s string) (string, error) {
 	var (
-		builder strings.Builder
-		num     int
-		err     error
-		escape  bool
+		builder  strings.Builder
+		num      int
+		err      error
+		escape   bool
+		prevRune rune
+		hasRune  bool
 	)
 
-	if utf8.RuneCountInString(s) == 0 {
-		return "", errors.New("invalid string")
+	if len(s) == 0 {
+		return "", nil
 	}
 
-	for i, r := range s {
+	for _, r := range s {
 		if r == '\\' && !escape {
 			escape = true
 			continue
 		}
 
 		if unicode.IsDigit(r) {
-			if i == 0 {
+			if !hasRune {
 				return "", errors.New("invalid string")
 			}
 
 			if escape {
-				builder.WriteString(string(r))
+				builder.WriteRune(r)
+				prevRune = r
+				hasRune = true
 				escape = false
 				continue
 			}
@@ -65,12 +68,15 @@ func unpack(s string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			builder.WriteString(strings.Repeat(string(s[i-1]), num-1))
+
+			builder.WriteString(strings.Repeat(string(prevRune), num-1))
 			continue
 		}
 
 		escape = false
-		builder.WriteString(string(r))
+		builder.WriteRune(r)
+		prevRune = r
+		hasRune = true
 	}
 
 	return builder.String(), nil
