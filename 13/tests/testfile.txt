@@ -1,0 +1,26 @@
+ID	Name	Role	City
+1	Alice	Developer	Moscow
+2	Bob	Tester	Kazan
+3	Charlie	Manager	Saint-Petersburg
+4	Diana	DevOps	Novosibirsk
+5	Eve	Analyst	Sochi
+6	Frank	Support	Ufa
+7	Grace	Designer	Perm
+
+ThisLineHasNoDelimiter
+JustTextWithoutTabsOrColons
+
+log:INFO:ServiceStarted:OK
+log:WARN:LowMemory:Check
+log:ERROR:DiskFull:Critical
+user:admin:login:success
+user:guest:login:failed
+
+Short	OnlyTwoFields
+EdgeCase	SecondField
+
+no_colon_here
+plain text again
+
+data:one:two
+singlefield
